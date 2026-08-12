@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Student Roster{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin: 0;">Student Directory</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">Manage registered students, view attendance profiles, and retrain AI face models.</p>
+    </div>
+    <a href="{{ url_for('register_student') }}" class="btn btn-primary">
+        ➕ Register New Student
+    </a>
+</div>
+
+<!-- Search & Filter Form Card -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="search">Search Name / Roll</label>
+            <input type="text" id="search" name="search" value="{{ search }}" placeholder="Search student name or roll...">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="branch">Branch Filter</label>
+            <select id="branch" name="branch">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                    <option value="{{ b }}" {{ 'selected' if branch_filter == b else '' }}>{{ b }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="section">Section Filter</label>
+            <select id="section" name="section">
+                <option value="">All Sections</option>
+                {% for sec in sections %}
+                    <option value="{{ sec }}" {{ 'selected' if section_filter == sec else '' }}>Section {{ sec }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-secondary" style="flex: 1; justify-content: center;">Search</button>
+            <a href="{{ url_for('students') }}" class="btn btn-secondary" style="padding: 0.625rem;">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Students Roster Table Card -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Branch</th>
+                    <th>Section</th>
+                    <th>Face Model Status</th>
+                    <th>Registered Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if students %}
+                    {% for s in students %}
+                    <tr>
+                        <td>#{{ s.id }}</td>
+                        <td>
+                            <a href="{{ url_for('student_profile', student_id=s.id) }}" style="color: #60a5fa; font-weight: 700; text-decoration: none;" title="Click to view profile">
+                                {{ s.roll_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('student_profile', student_id=s.id) }}" style="color: #f8fafc; font-weight: 700; text-decoration: none;" title="Click to view profile">
+                                {{ s.name }}
+                            </a>
+                        </td>
+                        <td>{{ s.branch }}</td>
+                        <td>Sec {{ s.section }}</td>
+                        <td>
+                            {% if s.face_registered %}
+                                <span class="status-badge status-present">✓ Face Model Active</span>
+                            {% else %}
+                                <span class="status-badge status-absent">⚠️ Pending Face Capture</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.created_at }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{{ url_for('student_profile', student_id=s.id) }}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.775rem;">
+                                    👤 Profile
+                                </a>
+                                <a href="{{ url_for('capture_face', student_id=s.id) }}" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.775rem;">
+                                    📸 Capture / Retrain
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            No student records found. Click "Register New Student" to add students.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

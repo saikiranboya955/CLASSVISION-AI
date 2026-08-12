@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Start Attendance Session{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 680px; margin: 0 auto;">
+    <div style="margin-bottom: 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); padding-bottom: 1rem;">
+        <h3 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+            <span>⚡</span> Launch Attendance Session
+        </h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">Select class details and choose attendance verification method.</p>
+    </div>
+
+    <form method="POST" id="takeForm">
+        <div class="form-group">
+            <label for="subject">Subject Name *</label>
+            <input type="text" id="subject" name="subject" required placeholder="e.g., Data Structures, Machine Learning, Physics" value="{{ subject or '' }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="branch">Branch *</label>
+                <select id="branch" name="branch" required>
+                    <option value="">Select Branch</option>
+                    <option value="CSE" {{ 'selected' if branch == 'CSE' else '' }}>CSE</option>
+                    <option value="CSE - AI & ML" {{ 'selected' if branch == 'CSE - AI & ML' else '' }}>CSE - AI & ML</option>
+                    <option value="CSE - Data Science" {{ 'selected' if branch == 'CSE - Data Science' else '' }}>CSE - Data Science</option>
+                    <option value="IT" {{ 'selected' if branch == 'IT' else '' }}>IT</option>
+                    <option value="ECE" {{ 'selected' if branch == 'ECE' else '' }}>ECE</option>
+                    <option value="EEE" {{ 'selected' if branch == 'EEE' else '' }}>EEE</option>
+                    <option value="Mechanical" {{ 'selected' if branch == 'Mechanical' else '' }}>Mechanical</option>
+                    <option value="Civil" {{ 'selected' if branch == 'Civil' else '' }}>Civil</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="section">Section *</label>
+                <select id="section" name="section" required>
+                    <option value="">Select Section</option>
+                    <option value="A" {{ 'selected' if section == 'A' else '' }}>Section A</option>
+                    <option value="B" {{ 'selected' if section == 'B' else '' }}>Section B</option>
+                    <option value="C" {{ 'selected' if section == 'C' else '' }}>Section C</option>
+                    <option value="D" {{ 'selected' if section == 'D' else '' }}>Section D</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Attendance Method Selector Cards -->
+        <div style="margin-bottom: 1.75rem;">
+            <label style="color: #cbd5e1; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Select Attendance Method *</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <label style="background: rgba(15, 23, 42, 0.7); border: 2px solid rgba(59, 130, 246, 0.4); border-radius: 12px; padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease;">
+                    <input type="radio" name="method" value="face" checked style="accent-color: #3b82f6; width: 18px; height: 18px;">
+                    <div>
+                        <div style="color: #f8fafc; font-weight: 700; font-size: 0.95rem;">📷 AI Face Recognition</div>
+                        <div style="color: #94a3b8; font-size: 0.75rem;">WebRTC live camera & LBPH vision model</div>
+                    </div>
+                </label>
+
+                <label style="background: rgba(15, 23, 42, 0.7); border: 2px solid rgba(0, 245, 212, 0.3); border-radius: 12px; padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease;">
+                    <input type="radio" name="method" value="qr" style="accent-color: #00f5d4; width: 18px; height: 18px;">
+                    <div>
+                        <div style="color: #f8fafc; font-weight: 700; font-size: 0.95rem;">📱 QR Code Attendance</div>
+                        <div style="color: #94a3b8; font-size: 0.75rem;">Scan QR code or enter manual code</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center; padding: 0.85rem; font-size: 1rem;">
+                🚀 Launch Session
+            </button>
+            <a href="{{ url_for('attendance') }}" class="btn btn-secondary" style="padding: 0.85rem 1.25rem;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('takeForm').addEventListener('submit', function() {
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '⚡ Initializing Session...';
+});
+</script>
+{% endblock %}

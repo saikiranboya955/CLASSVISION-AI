@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<!-- Fullscreen Futuristic Dark Classroom Background matching reference image -->
+<div style="position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; background: #030712; z-index: 1;">
+    <!-- Classroom Background Photo Overlay with Dark Atmosphere & Blue Glow -->
+    <div style="position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; filter: brightness(0.22) contrast(1.2) blur(3px); transform: scale(1.05);"></div>
+    
+    <!-- Neon Blue Ceiling Beams & Ambient Vignette Overlay -->
+    <div style="position: absolute; inset: 0; background: radial-gradient(circle at 75% 35%, rgba(37, 99, 235, 0.25) 0%, transparent 60%), radial-gradient(circle at 25% 65%, rgba(147, 51, 234, 0.2) 0%, transparent 60%), linear-gradient(180deg, rgba(3, 7, 18, 0.8) 0%, rgba(3, 7, 18, 0.95) 100%);"></div>
+    
+    <!-- Angled Overhead Blue LED Light Strips (Ceiling Beams) -->
+    <div style="position: absolute; top: -50px; right: 15%; width: 500px; height: 180px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), transparent); filter: blur(30px); transform: rotate(-25deg); pointer-events: none;"></div>
+</div>
+
+<!-- Main UI Layout Container -->
+<div style="position: relative; z-index: 10; min-height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: space-between; overflow-x: hidden;">
+    
+    <!-- Top Left Branding Header Bar -->
+    <header style="padding: 1.75rem 3.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 46px; height: 46px; background: linear-gradient(135deg, #2563eb, #9333ea); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);">
+                👁️
+            </div>
+            <div>
+                <h1 style="font-size: 1.65rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin: 0; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 6px;">
+                    ClassVision <span style="background: linear-gradient(135deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI</span>
+                </h1>
+                <p style="color: #94a3b8; font-size: 0.775rem; letter-spacing: 0.04em; margin: 0;">Smart Attendance Management System</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Split Grid -->
+    <main style="flex: 1; display: grid; grid-template-columns: 460px 1fr; max-width: 1350px; width: 100%; margin: 0 auto; padding: 0 2rem; gap: 3.5rem; align-items: center;">
+        
+        <!-- LEFT PANEL: Glassmorphism Faculty Login Card -->
+        <div style="width: 100%;">
+            <div style="background: rgba(11, 18, 38, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1.5px solid rgba(59, 130, 246, 0.35); border-radius: 24px; padding: 2.5rem 2.25rem; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(37, 99, 235, 0.2); position: relative; overflow: hidden;">
+                
+                <!-- Glowing Top Border Accent -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #2563eb, #9333ea, #00f5d4, #2563eb); background-size: 200% 100%; animation: gradientGlow 4s linear infinite;"></div>
+                
+                <!-- Header Icon & Title -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="width: 44px; height: 44px; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #60a5fa; margin-bottom: 1rem;">
+                        👁️
+                    </div>
+                    <h2 style="font-size: 1.75rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">Welcome Back!</h2>
+                    <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">Sign in to continue to your dashboard</p>
+                </div>
+
+                <!-- Login Form -->
+                <form method="POST" id="loginForm" autocomplete="off">
+                    <div class="form-group" style="margin-bottom: 1.35rem;">
+                        <label for="faculty_id" style="color: #e2e8f0; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: block;">FACULTY ID / EMAIL</label>
+                        <div style="position: relative;">
+                            <input type="text" id="faculty_id" name="faculty_id" required placeholder="Enter Faculty ID or Email" value="{{ faculty_id or '' }}" style="width: 100%; padding: 0.9rem 1rem 0.9rem 2.75rem; background: rgba(3, 7, 18, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 14px; color: #f8fafc; font-size: 0.95rem; transition: all 0.3s ease;">
+                            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 1.15rem;">👤</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.85rem;">
+                        <label for="password" style="color: #e2e8f0; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: block;">PASSWORD</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password" name="password" required placeholder="••••••••••••" style="width: 100%; padding: 0.9rem 2.75rem 0.9rem 2.75rem; background: rgba(3, 7, 18, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 14px; color: #f8fafc; font-size: 0.95rem; transition: all 0.3s ease;">
+                            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #f59e0b; font-size: 1.15rem;">🔒</span>
+                            <button type="button" onclick="togglePassword()" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.15rem; padding: 0;">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.95rem; font-size: 1.025rem; font-weight: 700; border-radius: 14px; background: linear-gradient(90deg, #2563eb 0%, #9333ea 100%); border: none; color: #ffffff; box-shadow: 0 4px 25px rgba(37, 99, 235, 0.45); cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <span>Sign In to Dashboard</span>
+                        <span style="font-size: 1.1rem;">→</span>
+                    </button>
+                </form>
+
+                <!-- OR Divider -->
+                <div style="display: flex; align-items: center; margin: 1.75rem 0; color: #64748b; font-size: 0.75rem; font-weight: 700;">
+                    <div style="flex: 1; height: 1px; background: rgba(148, 163, 184, 0.2);"></div>
+                    <span style="padding: 0 14px; text-transform: uppercase; letter-spacing: 0.12em;">OR</span>
+                    <div style="flex: 1; height: 1px; background: rgba(148, 163, 184, 0.2);"></div>
+                </div>
+
+                <div style="text-align: center; font-size: 0.875rem;">
+                    <span style="color: #94a3b8;">Don't have a faculty account?</span>
+                    <a href="{{ url_for('register') }}" style="color: #60a5fa; font-weight: 700; text-decoration: none; margin-left: 6px; transition: color 0.2s ease;">Register Account</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Premium AI Recognition Dashboard (Exact Blueprint Match) -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+            
+            <!-- Outer HUD Bounding Frame Container -->
+            <div style="width: 100%; max-width: 620px; height: 530px; background: rgba(11, 18, 38, 0.7); border: 1.5px solid rgba(0, 245, 212, 0.4); border-radius: 20px; position: relative; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 50px rgba(0, 245, 212, 0.15), inset 0 0 40px rgba(37, 99, 235, 0.15); overflow: hidden;">
+                
+                <!-- HUD Frame Corner Brackets -->
+                <div style="position: absolute; top: 12px; left: 12px; width: 30px; height: 30px; border-top: 3px solid #00f5d4; border-left: 3px solid #00f5d4;"></div>
+                <div style="position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-top: 3px solid #00f5d4; border-right: 3px solid #00f5d4;"></div>
+                <div style="position: absolute; bottom: 12px; left: 12px; width: 30px; height: 30px; border-bottom: 3px solid #00f5d4; border-left: 3px solid #00f5d4;"></div>
+                <div style="position: absolute; bottom: 12px; right: 12px; width: 30px; height: 30px; border-bottom: 3px solid #00f5d4; border-right: 3px solid #00f5d4;"></div>
+
+                <!-- Top Right LIVE RECOGNITION Pill Badge -->
+                <div style="position: absolute; top: 22px; right: 22px; z-index: 20; background: rgba(3, 7, 18, 0.9); border: 1px solid rgba(34, 197, 94, 0.5); padding: 0.35rem 0.9rem; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);">
+                    <span style="display: inline-block; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; animation: pulseDot 1.5s infinite;"></span>
+                    <span style="color: #ffffff; font-size: 0.725rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">LIVE RECOGNITION</span>
+                </div>
+
+                <!-- Main AI Face Scanning Viewport Area -->
+                <div style="position: relative; width: 100%; height: 360px; display: flex; align-items: center; justify-content: center;">
+                    
+                    <!-- Exact Real Human Student Face Photo Layer -->
+                    <div style="position: absolute; left: 60px; width: 250px; height: 310px; border-radius: 16px; overflow: hidden; box-shadow: 0 0 35px rgba(0, 0, 0, 0.85);">
+                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80" alt="Student AI Recognition" style="width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1) brightness(0.95);">
+                    </div>
+
+                    <!-- Glowing Cyan Bounding Box Around Face -->
+                    <div style="position: absolute; left: 60px; width: 250px; height: 310px; border: 2px solid #00f5d4; border-radius: 16px; box-shadow: 0 0 25px rgba(0, 245, 212, 0.45), inset 0 0 20px rgba(0, 245, 212, 0.25); pointer-events: none;">
+                        <!-- Corner Tick Mark Brackets -->
+                        <div style="position: absolute; top: -2px; left: -2px; width: 18px; height: 18px; border-top: 3px solid #ffffff; border-left: 3px solid #ffffff;"></div>
+                        <div style="position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; border-top: 3px solid #ffffff; border-right: 3px solid #ffffff;"></div>
+                        <div style="position: absolute; bottom: -2px; left: -2px; width: 18px; height: 18px; border-bottom: 3px solid #ffffff; border-left: 3px solid #ffffff;"></div>
+                        <div style="position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px; border-bottom: 3px solid #ffffff; border-right: 3px solid #ffffff;"></div>
+                    </div>
+
+                    <!-- SVG 3D AI Facial Mesh Wireframe Grid Overlay -->
+                    <svg style="position: absolute; left: 60px; width: 250px; height: 310px; pointer-events: none; z-index: 15;" viewBox="0 0 250 310">
+                        <!-- Facial Mesh Dotted Polygon Connections -->
+                        <path d="M 80 95 L 125 85 L 170 95 L 125 125 Z" fill="none" stroke="rgba(0, 245, 212, 0.7)" stroke-width="1.2" />
+                        <path d="M 80 95 L 95 145 L 125 160 L 155 145 L 170 95" fill="none" stroke="rgba(59, 130, 246, 0.7)" stroke-width="1.2" />
+                        <path d="M 95 145 L 125 210 L 155 145" fill="none" stroke="rgba(0, 245, 212, 0.7)" stroke-width="1.2" />
+                        <path d="M 125 160 L 125 240" fill="none" stroke="rgba(0, 245, 212, 0.7)" stroke-width="1.2" />
+                        <path d="M 85 225 L 125 240 L 165 225 L 125 255 Z" fill="none" stroke="rgba(0, 245, 212, 0.7)" stroke-width="1.2" />
+                        
+                        <!-- Glowing Cyan Keypoint Nodes -->
+                        <circle cx="90" cy="120" r="3.5" fill="#00f5d4" />
+                        <circle cx="160" cy="120" r="3.5" fill="#00f5d4" />
+                        <circle cx="125" cy="160" r="3.5" fill="#00f5d4" />
+                        <circle cx="100" cy="210" r="3.5" fill="#00f5d4" />
+                        <circle cx="150" cy="210" r="3.5" fill="#00f5d4" />
+                        <circle cx="125" cy="240" r="3.5" fill="#00f5d4" />
+                        <circle cx="70" cy="145" r="3.5" fill="#3b82f6" />
+                        <circle cx="180" cy="145" r="3.5" fill="#3b82f6" />
+                        <circle cx="125" cy="95" r="3.5" fill="#3b82f6" />
+                    </svg>
+
+                    <!-- Horizontal Laser Scanning Beam Line -->
+                    <div style="position: absolute; left: 60px; width: 250px; height: 3px; background: #00f5d4; box-shadow: 0 0 15px #00f5d4, 0 0 30px #00f5d4; animation: laserScan 3.2s ease-in-out infinite; z-index: 16;"></div>
+
+                    <!-- Right Side Floating Glass Card: "Face Detected" -->
+                    <div style="position: absolute; right: 10px; top: 45px; z-index: 25; width: 235px; background: rgba(11, 18, 38, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1.5px solid rgba(0, 245, 212, 0.35); border-radius: 16px; padding: 1.25rem; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);">
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                            <h4 style="color: #00f5d4; font-size: 1rem; font-weight: 800; margin: 0;">Face Detected</h4>
+                            <span style="color: #22c55e; font-size: 1.1rem; font-weight: 800;">✓</span>
+                        </div>
+                        <p style="color: #94a3b8; font-size: 0.775rem; margin: 0 0 14px 0;">Identity Verified</p>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8;">Confidence</span>
+                                <span style="color: #22c55e; font-weight: 800;">99.4% ✓</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8;">Liveness</span>
+                                <span style="color: #22c55e; font-weight: 800;">Verified ✓</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8;">Model</span>
+                                <span style="color: #c084fc; font-weight: 800;">LBPH ✓</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8;">Status</span>
+                                <span style="color: #22c55e; font-weight: 800;">Active ✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Section (Matching Reference Blueprint) -->
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.775rem; font-weight: 800; color: #00f5d4; letter-spacing: 0.15em;">
+                        <span>PROGRESS</span>
+                        <span id="scanPct">84%</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(3, 7, 18, 0.85); border: 1px solid rgba(0, 245, 212, 0.35); border-radius: 4px; overflow: hidden; position: relative;">
+                        <div id="scanBarFill" style="width: 84%; height: 100%; background: linear-gradient(90deg, #2563eb, #00f5d4); box-shadow: 0 0 12px #00f5d4; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- Animated Waveform Curve at Bottom -->
+                <div style="height: 38px; width: 100%; position: relative; margin-top: 4px;">
+                    <canvas id="waveCanvas" width="560" height="38" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Feature Highlight Cards (Exact Reference Blueprint) -->
+    <div style="max-width: 1350px; width: 100%; margin: 1.5rem auto 1.5rem auto; padding: 0 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+            <div style="background: rgba(11, 18, 38, 0.65); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; padding: 0.9rem 1.25rem; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(12px);">
+                <div style="font-size: 24px; color: #2563eb;">🤖</div>
+                <div>
+                    <h5 style="color: #ffffff; font-size: 0.85rem; font-weight: 800; margin: 0;">AI Powered</h5>
+                    <p style="color: #94a3b8; font-size: 0.75rem; margin: 0;">Smart Recognition</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(11, 18, 38, 0.65); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; padding: 0.9rem 1.25rem; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(12px);">
+                <div style="font-size: 24px; color: #9333ea;">🛡️</div>
+                <div>
+                    <h5 style="color: #ffffff; font-size: 0.85rem; font-weight: 800; margin: 0;">Secure Access</h5>
+                    <p style="color: #94a3b8; font-size: 0.75rem; margin: 0;">Data Protection</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(11, 18, 38, 0.65); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; padding: 0.9rem 1.25rem; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(12px);">
+                <div style="font-size: 24px; color: #00f5d4;">⏱️</div>
+                <div>
+                    <h5 style="color: #ffffff; font-size: 0.85rem; font-weight: 800; margin: 0;">Real-time</h5>
+                    <p style="color: #94a3b8; font-size: 0.75rem; margin: 0;">Attendance Check</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(11, 18, 38, 0.65); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; padding: 0.9rem 1.25rem; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(12px);">
+                <div style="font-size: 24px; color: #f59e0b;">🎯</div>
+                <div>
+                    <h5 style="color: #ffffff; font-size: 0.85rem; font-weight: 800; margin: 0;">Accurate</h5>
+                    <p style="color: #94a3b8; font-size: 0.75rem; margin: 0;">High Precision</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section (Exact Reference Text) -->
+    <footer style="padding: 1.25rem 2rem; text-align: center; border-top: 1px solid rgba(148, 163, 184, 0.12); background: rgba(3, 7, 18, 0.9); backdrop-filter: blur(12px); z-index: 10;">
+        <p style="color: #f8fafc; font-size: 0.875rem; font-weight: 800; margin: 0 0 4px 0;">
+            Powered by AI Face Recognition
+        </p>
+        <p style="color: #60a5fa; font-size: 0.775rem; font-weight: 600; letter-spacing: 0.05em; margin: 0 0 6px 0;">
+            OpenCV • Flask • SQLite • Python • LBPH • WebRTC
+        </p>
+        <p style="color: #94a3b8; font-size: 0.775rem; font-style: italic; margin: 0;">
+            "Transforming attendance into intelligent automation."
+        </p>
+    </footer>
+</div>
+
+<style>
+@keyframes gradientGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+@keyframes pulseDot {
+    0% { opacity: 1; }
+    50% { opacity: 0.35; }
+    100% { opacity: 1; }
+}
+@keyframes laserScan {
+    0% { top: 10px; }
+    50% { top: 290px; }
+    100% { top: 10px; }
+}
+@media (max-width: 1024px) {
+    main { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+</style>
+
+<script>
+function togglePassword() {
+    const pwdInput = document.getElementById('password');
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+    } else {
+        pwdInput.type = 'password';
+    }
+}
+
+// Waveform Canvas Animation
+(function() {
+    const wCanvas = document.getElementById('waveCanvas');
+    if (!wCanvas) return;
+    const wCtx = wCanvas.getContext('2d');
+    let waveOffset = 0;
+
+    function drawWave() {
+        wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+        waveOffset += 0.06;
+
+        wCtx.beginPath();
+        wCtx.moveTo(0, wCanvas.height / 2);
+
+        for (let x = 0; x < wCanvas.width; x += 4) {
+            let y = Math.sin(x * 0.035 + waveOffset) * 9 + Math.cos(x * 0.02 - waveOffset) * 4.5 + wCanvas.height / 2;
+            wCtx.lineTo(x, y);
+        }
+
+        wCtx.lineTo(wCanvas.width, wCanvas.height);
+        wCtx.lineTo(0, wCanvas.height);
+        wCtx.closePath();
+
+        let waveGrad = wCtx.createLinearGradient(0, 0, 0, wCanvas.height);
+        waveGrad.addColorStop(0, 'rgba(0, 245, 212, 0.35)');
+        waveGrad.addColorStop(1, 'rgba(37, 99, 235, 0.05)');
+        wCtx.fillStyle = waveGrad;
+        wCtx.fill();
+
+        wCtx.strokeStyle = '#00f5d4';
+        wCtx.lineWidth = 1.5;
+        wCtx.stroke();
+
+        requestAnimationFrame(drawWave);
+    }
+
+    drawWave();
+
+    // Progress bar counter simulation
+    let pct = 84;
+    setInterval(() => {
+        pct = (pct >= 99) ? 75 : pct + 1;
+        const pctEl = document.getElementById('scanPct');
+        const fillEl = document.getElementById('scanBarFill');
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (fillEl) fillEl.style.width = pct + '%';
+    }, 500);
+})();
+</script>
+{% endblock %}

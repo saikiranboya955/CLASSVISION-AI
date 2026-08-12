@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Chart.js Engine -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Header & Export Action Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h3 style="font-size: 1.6rem; font-weight: 800; color: #f8fafc; margin: 0;">Student Attendance Profile</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">Comprehensive academic turnout analytics derived from finalized class sessions.</p>
+    </div>
+    
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{{ url_for('export_student_attendance', student_id=student.id, fmt='csv') }}" class="btn btn-secondary" style="border-color: #3b82f6; color: #60a5fa;">
+            📥 Export CSV
+        </a>
+        <a href="{{ url_for('export_student_attendance', student_id=student.id, fmt='excel') }}" class="btn btn-secondary" style="border-color: #22c55e; color: #4ade80;">
+            📊 Export Excel
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            🖨️ Print / PDF
+        </button>
+        <a href="{{ url_for('students') }}" class="btn btn-secondary">
+            ← Back to Roster
+        </a>
+    </div>
+</div>
+
+<!-- Student Identity Header Card -->
+<div class="card" style="margin-bottom: 1.75rem; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #8b5cf6, #00f5d4);"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <!-- Real Student Captured Dataset Photo OR Avatar Badge -->
+            {% if has_photo %}
+                <img src="{{ url_for('student_photo', student_id=student.id) }}" alt="{{ student.name }}" style="width: 88px; height: 88px; border-radius: 22px; object-fit: cover; border: 2px solid rgba(0, 245, 212, 0.4); box-shadow: 0 8px 24px rgba(0, 245, 212, 0.25);">
+            {% else %}
+                <div style="width: 88px; height: 88px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 44px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35); border: 2px solid rgba(255, 255, 255, 0.15);">
+                    🎓
+                </div>
+            {% endif %}
+
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <h2 style="font-size: 1.75rem; font-weight: 800; color: #ffffff; margin: 0;">{{ student.name }}</h2>
+                    {% if student.face_registered %}
+                        <span class="status-badge status-present" style="font-size: 0.775rem;">✓ Face Model Active</span>
+                    {% else %}
+                        <span class="status-badge status-absent" style="font-size: 0.775rem;">⚠️ Face Pending</span>
+                    {% endif %}
+                    <span class="status-badge {{ eligibility_class }}" style="font-size: 0.825rem; font-weight: 700; padding: 0.3rem 0.85rem;">
+                        {{ eligibility_status }}
+                    </span>
+                </div>
+                <p style="color: #60a5fa; font-size: 1.05rem; font-weight: 700; margin-top: 6px;">
+                    Roll Number: {{ student.roll_number }}
+                </p>
+                <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">
+                    Department: <strong>Computer Science</strong> | Branch: <strong>{{ student.branch }}</strong> | Section: <strong>Sec {{ student.section }}</strong> | Registered: <strong>{{ student.created_at }}</strong>
+                </p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ url_for('capture_face', student_id=student.id) }}" class="btn btn-primary" style="padding: 0.7rem 1.25rem;">
+                📸 Retrain Dataset
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Overall Attendance Summary Cards (Finalized Sessions Only) -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
+    <div class="stat-card">
+        <h4>Overall Attendance Rate</h4>
+        <div class="value" style="color: {% if overall_percentage >= 75 %}#4ade80{% elif overall_percentage >= 65 %}#f59e0b{% else %}#f87171{% endif %}; font-size: 2.2rem;">
+            {{ overall_percentage }}%
+        </div>
+        <div class="percentage" style="color: #94a3b8;">Finalized Classes Formula</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Conducted Classes</h4>
+        <div class="value">{{ total_conducted }}</div>
+        <div class="percentage" style="color: #60a5fa;">Total Locked Sessions</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Present Classes</h4>
+        <div class="value" style="color: #4ade80;">{{ present_count }}</div>
+        <div class="percentage" style="color: #4ade80;">Attended Sessions</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Absent Classes</h4>
+        <div class="value" style="color: #f87171;">{{ absent_count }}</div>
+        <div class="percentage" style="color: #f87171;">Missed Sessions</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Last Activity</h4>
+        <div class="value" style="font-size: 1.2rem; color: #c084fc;">{{ last_date }}</div>
+        <div class="percentage" style="color: #c084fc;">Last Status: {{ last_status }}</div>
+    </div>
+</div>
+
+<!-- Analytics Charts Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- 1. Attendance Yield Doughnut Chart -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>🍩</span> Overall Attendance Share
+        </h4>
+        <div style="position: relative; height: 240px; width: 100%;">
+            <canvas id="studentDoughnutChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 2. Subject-wise Attendance Bar Chart -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📚</span> Subject-wise Turnout Rate (%)
+        </h4>
+        <div style="position: relative; height: 240px; width: 100%;">
+            <canvas id="subjectTurnoutChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Subject-Wise Attendance Breakdown Table (Only subjects with attendance for THIS student) -->
+<div class="card" style="padding: 0; overflow: hidden; margin-bottom: 2rem;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); background: rgba(15, 23, 42, 0.7);">
+        <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📚</span> Subject-Wise Attendance Breakdown
+        </h4>
+    </div>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject Name</th>
+                    <th>Conducted</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Attendance %</th>
+                    <th>Status Badge</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if subject_stats %}
+                    {% for sub in subject_stats %}
+                    <tr>
+                        <td><strong>{{ sub.subject }}</strong></td>
+                        <td>{{ sub.conducted }}</td>
+                        <td style="color: #4ade80; font-weight: 600;">{{ sub.present }}</td>
+                        <td style="color: #f87171; font-weight: 600;">{{ sub.absent }}</td>
+                        <td><strong style="color: #60a5fa;">{{ sub.percentage }}%</strong></td>
+                        <td>
+                            <span class="status-badge {{ sub.status_class }}" style="font-size: 0.75rem;">
+                                {{ sub.status_badge }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            No subject attendance records found for this student.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- History Search & Filter Card -->
+<div class="card" style="margin-bottom: 1.75rem;">
+    <div style="margin-bottom: 1rem;">
+        <h4 style="margin: 0; font-size: 0.95rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>🔍</span> Filter Attendance History
+        </h4>
+    </div>
+    <form method="GET" action="{{ url_for('student_profile', student_id=student.id) }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject" onchange="this.form.submit()">
+                <option value="">All Subjects</option>
+                {% for sub in available_subjects %}
+                    <option value="{{ sub }}" {{ 'selected' if subject_filter == sub else '' }}>{{ sub }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="month">Month</label>
+            <input type="month" id="month" name="month" value="{{ month_filter }}" onchange="this.form.submit()">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="status">Status</label>
+            <select id="status" name="status" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="Present" {{ 'selected' if status_filter == 'Present' else '' }}>Present</option>
+                <option value="Absent" {{ 'selected' if status_filter == 'Absent' else '' }}>Absent</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-secondary" style="flex: 1; justify-content: center;">Apply</button>
+            <a href="{{ url_for('student_profile', student_id=student.id) }}" class="btn btn-secondary" style="padding: 0.625rem;">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Detailed Session Attendance History Table -->
+<div class="card" style="padding: 0; overflow: hidden; margin-bottom: 2rem;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📋</span> Complete Finalized Session History
+        </h4>
+        <span style="color: #94a3b8; font-size: 0.85rem;">Total {{ records|length }} records</span>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Session ID</th>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Faculty</th>
+                    <th>Check-in Time</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if records %}
+                    {% for r in records %}
+                    <tr>
+                        <td>#{{ r.session_id }}</td>
+                        <td>{{ r.date }}</td>
+                        <td><strong>{{ r.subject }}</strong></td>
+                        <td>{{ r.faculty_name }}</td>
+                        <td>{{ r.check_in_time or '—' }}</td>
+                        <td>
+                            <span style="font-size: 0.75rem; background: rgba(148, 163, 184, 0.1); padding: 0.2rem 0.5rem; border-radius: 4px; color: #94a3b8;">
+                                {{ r.recognition_method or 'face' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if r.status == 'Present' %}
+                                <span class="status-badge status-present">PRESENT</span>
+                            {% else %}
+                                <span class="status-badge status-absent">ABSENT</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                            No finalized session history matching the filter criteria.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Audit History Table Card -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); background: rgba(15, 23, 42, 0.6);">
+        <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📜</span> Manual Attendance Correction & Audit History
+        </h4>
+    </div>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Edit Timestamp</th>
+                    <th>Subject & Date</th>
+                    <th>Edited By (Faculty)</th>
+                    <th>Original → Updated Status</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if audit_logs %}
+                    {% for log in audit_logs %}
+                    <tr>
+                        <td style="color: #94a3b8; font-size: 0.8rem;">{{ log.created_at }}</td>
+                        <td><strong>{{ log.subject }}</strong> ({{ log.date }})</td>
+                        <td>{{ log.faculty_name }}</td>
+                        <td>
+                            <span style="color: #f87171; font-size: 0.775rem;">{{ log.previous_status }}</span>
+                            <span style="color: #94a3b8; margin: 0 4px;">→</span>
+                            <span style="color: #4ade80; font-size: 0.775rem;">{{ log.new_status }}</span>
+                        </td>
+                        <td>
+                            <span style="background: rgba(59, 130, 246, 0.12); color: #60a5fa; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                {{ log.reason }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            No manual attendance overrides recorded for this student.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+
+    // 1. Doughnut Chart
+    new Chart(document.getElementById('studentDoughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Present Classes', 'Absent Classes'],
+            datasets: [{
+                data: [{{ present_count }}, {{ absent_count }}],
+                backgroundColor: ['#22c55e', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // 2. Subject Turnout Bar Chart
+    const subjectLabels = [{% for sub in subject_stats %}"{{ sub.subject }}",{% endfor %}];
+    const subjectData = [{% for sub in subject_stats %}{{ sub.percentage }},{% endfor %}];
+
+    new Chart(document.getElementById('subjectTurnoutChart'), {
+        type: 'bar',
+        data: {
+            labels: subjectLabels,
+            datasets: [{
+                label: 'Attendance %',
+                data: subjectData,
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: '#3b82f6',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { max: 100, min: 0 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+});
+</script>
+{% endblock %}

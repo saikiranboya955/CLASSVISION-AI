@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Profile{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); padding-bottom: 1.5rem;">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0 auto 1rem auto; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);">
+            👨‍🏫
+        </div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px;">{{ faculty.name }}</h3>
+        <p style="color: #60a5fa; font-weight: 600; font-size: 0.9rem;">Faculty ID: {{ faculty.faculty_id }}</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.25rem;">
+        <div style="background: rgba(2, 6, 23, 0.6); padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.1);">
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Department</span>
+            <p style="color: #f8fafc; font-weight: 600; font-size: 1.05rem;">{{ faculty.department }}</p>
+        </div>
+
+        <div style="background: rgba(2, 6, 23, 0.6); padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.1);">
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Account Registered On</span>
+            <p style="color: #f8fafc; font-weight: 500;">{{ faculty.created_at }}</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+        <a href="{{ url_for('logout') }}" class="btn btn-danger" style="width: 100%; justify-content: center; padding: 0.75rem;">
+            🚪 Log Out of ClassVision AI
+        </a>
+    </div>
+</div>
+{% endblock %}

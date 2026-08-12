@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}QR Attendance Session #{{ attendance_session.id }}{% endblock %}
+
+{% block content %}
+<!-- Session Header & Lock Action Card -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin: 0;">Session #{{ attendance_session.id }}: {{ attendance_session.subject }}</h3>
+            {% if attendance_session.is_locked %}
+                <span class="status-badge status-absent" style="font-size: 0.8rem; padding: 0.25rem 0.75rem;">🔒 FINALIZED & LOCKED</span>
+            {% else %}
+                <span class="status-badge status-present" style="font-size: 0.8rem; padding: 0.25rem 0.75rem;">📱 LIVE QR SESSION</span>
+            {% endif %}
+        </div>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">
+            Class: <strong>{{ attendance_session.branch }} - Sec {{ attendance_session.section }}</strong> | 
+            Date: <strong>{{ attendance_session.date }}</strong>
+        </p>
+    </div>
+    
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        {% if not attendance_session.is_locked %}
+            <form method="POST" action="{{ url_for('submit_attendance_session', session_id=attendance_session.id) }}" onsubmit="return confirm('Are you sure you want to Finalize & Lock this session?');">
+                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    🔒 Submit & Finalize Session
+                </button>
+            </form>
+        {% endif %}
+        <a href="{{ url_for('attendance_detail', session_id=attendance_session.id) }}" class="btn btn-secondary">
+            View Roster Details →
+        </a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; margin-bottom: 2rem;">
+    
+    <!-- LEFT CARD: Active Session QR Code Display -->
+    <div class="card" style="text-align: center; background: rgba(11, 19, 43, 0.75); border: 1.5px solid rgba(0, 245, 212, 0.35);">
+        <h4 style="color: #00f5d4; margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>📱</span> Active QR Code Token
+        </h4>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.25rem;">Display this QR Token to your class for instant check-in.</p>
+        
+        <!-- Large QR Token Display Box -->
+        <div style="background: rgba(2, 6, 23, 0.9); padding: 1.5rem; border-radius: 16px; border: 2px dashed #00f5d4; display: inline-block; margin-bottom: 1rem;">
+            <div style="font-size: 2.75rem; font-weight: 900; color: #00f5d4; letter-spacing: 0.2em; font-family: monospace;">
+                {{ qr_token }}
+            </div>
+            <p style="color: #64748b; font-size: 0.75rem; margin: 6px 0 0 0; text-transform: uppercase;">8-Character Session Key</p>
+        </div>
+
+        <div style="color: #cbd5e1; font-size: 0.85rem; background: rgba(59, 130, 246, 0.12); padding: 0.75rem; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.25);">
+            Students can scan or enter code <strong>{{ qr_token }}</strong> to check in.
+        </div>
+    </div>
+
+    <!-- RIGHT CARD: Manual QR Code Entry Form -->
+    <div class="card" style="background: rgba(11, 19, 43, 0.75); border: 1.5px solid rgba(59, 130, 246, 0.35);">
+        <h4 style="color: #60a5fa; margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+            <span>⌨️</span> Manual QR Code & Roll Entry
+        </h4>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.25rem;">Enter student Roll Number and the 8-character QR Backup Code.</p>
+
+        <form method="POST" action="{{ url_for('submit_manual_qr_code', session_id=attendance_session.id) }}">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="roll_number">Student Roll Number *</label>
+                <input type="text" id="roll_number" name="roll_number" required placeholder="e.g., 2026CSE001" style="background: rgba(2, 6, 23, 0.85);">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="qr_code">8-Character QR Code *</label>
+                <input type="text" id="qr_code" name="qr_code" required placeholder="e.g., {{ qr_token }}" value="{{ qr_token }}" style="background: rgba(2, 6, 23, 0.85); font-family: monospace; letter-spacing: 0.1em; text-transform: uppercase;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem;">
+                ✅ Submit & Mark Present
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Checked-In Students Roster Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc;">Checked-In Students (QR Session)</h4>
+        <span style="color: #4ade80; font-size: 0.875rem; font-weight: 700;">{{ present_records|length }} Present</span>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Check-in Time</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if present_records %}
+                    {% for r in present_records %}
+                    <tr>
+                        <td><strong style="color: #60a5fa;">{{ r.roll_number }}</strong></td>
+                        <td>{{ r.name }}</td>
+                        <td>{{ r.check_in_time }}</td>
+                        <td><span style="font-size: 0.75rem; background: rgba(0, 245, 212, 0.15); color: #00f5d4; padding: 0.2rem 0.6rem; border-radius: 4px;">{{ r.recognition_method }}</span></td>
+                        <td><span class="status-badge status-present">PRESENT</span></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                            No QR attendance check-ins recorded yet for this session.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

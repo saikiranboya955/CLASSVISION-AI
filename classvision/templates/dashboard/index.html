@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Hero Banner -->
+<div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15)); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; padding: 1.75rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">
+            Welcome back, {{ session.get('faculty_name') }} 👋
+        </h3>
+        <p style="color: #94a3b8; font-size: 0.9rem;">ClassVision AI Smart Attendance & Analytics Engine is active.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('take_attendance') }}" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem;">
+            📷 Launch Live AI Session
+        </a>
+        <a href="{{ url_for('activity_log') }}" class="btn btn-secondary" style="padding: 0.75rem 1.25rem;">
+            📜 Activity Audit Log
+        </a>
+    </div>
+</div>
+
+<!-- Dashboard Filters Card -->
+<div class="card" style="margin-bottom: 1.75rem;">
+    <div style="margin-bottom: 1rem;">
+        <h4 style="margin: 0; font-size: 0.95rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>🔍</span> Filter Dashboard Analytics
+        </h4>
+    </div>
+    <form method="GET" action="{{ url_for('dashboard') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="branch">Branch</label>
+            <select id="branch" name="branch" onchange="this.form.submit()">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                    <option value="{{ b }}" {{ 'selected' if branch_filter == b else '' }}>{{ b }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="section">Section</label>
+            <select id="section" name="section" onchange="this.form.submit()">
+                <option value="">All Sections</option>
+                {% for sec in sections %}
+                    <option value="{{ sec }}" {{ 'selected' if section_filter == sec else '' }}>Section {{ sec }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" value="{{ subject_filter }}" placeholder="Subject name..." onchange="this.form.submit()">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" value="{{ date_filter }}" onchange="this.form.submit()">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-secondary" style="flex: 1; justify-content: center;">Apply</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" style="padding: 0.625rem;">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Live Statistics Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h4>Total Enrolled Students</h4>
+        <div class="value">{{ total_students }}</div>
+        <div class="percentage" style="color: #60a5fa;">Active Database Roster</div>
+    </div>
+    
+    <div class="stat-card">
+        <h4>Present Check-Ins</h4>
+        <div class="value" style="color: #4ade80;">{{ present_today }}</div>
+        <div class="percentage" style="color: #4ade80;">Verified via AI Vision</div>
+    </div>
+    
+    <div class="stat-card">
+        <h4>Absent Students</h4>
+        <div class="value" style="color: #f87171;">{{ absent_today }}</div>
+        <div class="percentage" style="color: #f87171;">Unrecorded / Auto-Marked</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Attendance Yield Rate</h4>
+        <div class="value" style="color: #00f5d4;">{{ attendance_percentage }}%</div>
+        <div class="percentage" style="color: #00f5d4;">Class Turnout</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Manual Corrections</h4>
+        <div class="value" style="color: #f59e0b;">{{ manual_edits_count }}</div>
+        <div class="percentage" style="color: #f59e0b;">Audit Log Entries</div>
+    </div>
+
+    <div class="stat-card">
+        <h4>Today's Sessions</h4>
+        <div class="value" style="color: #c084fc;">{{ today_sessions_count }}</div>
+        <div class="percentage" style="color: #c084fc;">Conducted Today</div>
+    </div>
+</div>
+
+<!-- Quick Action Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+    <a href="{{ url_for('register_student') }}" class="card" style="text-decoration: none; margin-bottom: 0; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#3b82f6';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(148,163,184,0.1)';">
+        <div style="font-size: 28px; margin-bottom: 0.5rem;">👥</div>
+        <h4 style="color: #f8fafc; margin-bottom: 4px; font-size: 1.05rem;">Register Student</h4>
+        <p style="color: #94a3b8; font-size: 0.8rem;">Add student details and capture face dataset.</p>
+    </a>
+    
+    <a href="{{ url_for('take_attendance') }}" class="card" style="text-decoration: none; margin-bottom: 0; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#8b5cf6';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(148,163,184,0.1)';">
+        <div style="font-size: 28px; margin-bottom: 0.5rem;">📷</div>
+        <h4 style="color: #f8fafc; margin-bottom: 4px; font-size: 1.05rem;">Take Attendance</h4>
+        <p style="color: #94a3b8; font-size: 0.8rem;">Launch live camera recognition for class.</p>
+    </a>
+
+    <a href="{{ url_for('reports') }}" class="card" style="text-decoration: none; margin-bottom: 0; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00f5d4';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(148,163,184,0.1)';">
+        <div style="font-size: 28px; margin-bottom: 0.5rem;">📈</div>
+        <h4 style="color: #f8fafc; margin-bottom: 4px; font-size: 1.05rem;">Chart.js Analytics</h4>
+        <p style="color: #94a3b8; font-size: 0.8rem;">Interactive graphs, trends & branch comparison.</p>
+    </a>
+
+    <a href="{{ url_for('activity_log') }}" class="card" style="text-decoration: none; margin-bottom: 0; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#f59e0b';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(148,163,184,0.1)';">
+        <div style="font-size: 28px; margin-bottom: 0.5rem;">📜</div>
+        <h4 style="color: #f8fafc; margin-bottom: 4px; font-size: 1.05rem;">Faculty Audit Trail</h4>
+        <p style="color: #94a3b8; font-size: 0.8rem;">View login, submission & edit activity logs.</p>
+    </a>
+</div>
+
+<!-- Recent Sessions Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc;">Recent Attendance Sessions</h3>
+        <a href="{{ url_for('attendance') }}" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">View All Sessions →</a>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Session ID</th>
+                    <th>Subject</th>
+                    <th>Class Branch / Sec</th>
+                    <th>Date</th>
+                    <th>Started At</th>
+                    <th>Status</th>
+                    <th>Faculty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_sessions %}
+                    {% for s in recent_sessions %}
+                    <tr>
+                        <td>#{{ s.id }}</td>
+                        <td><strong>{{ s.subject }}</strong></td>
+                        <td><span class="status-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">{{ s.branch }} - Sec {{ s.section }}</span></td>
+                        <td>{{ s.date }}</td>
+                        <td>{{ s.started_at }}</td>
+                        <td>
+                            {% if s.is_locked %}
+                                <span class="status-badge status-absent" style="font-size: 0.725rem;">🔒 Locked</span>
+                            {% else %}
+                                <span class="status-badge status-present" style="font-size: 0.725rem;">🟢 Live</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.faculty_name }}</td>
+                        <td>
+                            <a href="{{ url_for('attendance_detail', session_id=s.id) }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                                View Roster
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                            No recent attendance sessions found. Click "Take Attendance" to create your first session.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

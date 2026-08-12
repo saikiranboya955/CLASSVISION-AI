@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Attendance Reports{% endblock %}
+
+{% block content %}
+<!-- Include Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div style="margin-bottom: 1.75rem;">
+    <h3 style="font-size: 1.6rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">Attendance Analytics & Performance Dashboard</h3>
+    <p style="color: #94a3b8; font-size: 0.9rem;">Interactive visual metrics, Chart.js analytics graphs, subject turnout, and student rankings.</p>
+</div>
+
+<!-- Overview Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h4>Total Enrolled Students</h4>
+        <div class="value">{{ total_students }}</div>
+        <div class="percentage" style="color: #60a5fa;">Active Roster Records</div>
+    </div>
+    
+    <div class="stat-card">
+        <h4>Present Check-Ins Today</h4>
+        <div class="value" style="color: #4ade80;">{{ present_today }}</div>
+        <div class="percentage" style="color: #4ade80;">Verified via AI Vision</div>
+    </div>
+</div>
+
+<!-- Interactive Chart.js Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    
+    <!-- 1. Daily Attendance Trend Line Chart -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📈</span> Daily Attendance Check-In Trend (Last 7 Days)
+        </h4>
+        <div style="position: relative; height: 260px; width: 100%;">
+            <canvas id="dailyTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 2. Subject Session Volume Bar Chart -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>📚</span> Subject Session Volume Distribution
+        </h4>
+        <div style="position: relative; height: 260px; width: 100%;">
+            <canvas id="subjectBarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 3. Branch Attendance Rate Comparison -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>🏛️</span> Branch Attendance Turnout Rate (%)
+        </h4>
+        <div style="position: relative; height: 260px; width: 100%;">
+            <canvas id="branchChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 4. Overall Attendance Yield Doughnut Chart -->
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span>🍩</span> Today's Attendance Yield Share
+        </h4>
+        <div style="position: relative; height: 260px; width: 100%;">
+            <canvas id="yieldDoughnutChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Subject & Student Ranking Tables Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+    <!-- Subject Wise Breakdown Card -->
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+            <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc;">📚 Subject Session Summary</h4>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Sessions Conducted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if subject_stats %}
+                        {% for sub in subject_stats %}
+                        <tr>
+                            <td><strong>{{ sub.subject }}</strong></td>
+                            <td><span class="status-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">{{ sub.total_sessions }} Sessions</span></td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" style="text-align: center; padding: 2rem; color: #94a3b8;">No subject session data recorded yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Student Attendance Ranking Card -->
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+            <h4 style="margin: 0; font-size: 1.05rem; color: #f8fafc;">🏆 Top Attending Students</h4>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Class</th>
+                        <th>Present Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if student_stats %}
+                        {% for st in student_stats %}
+                        <tr>
+                            <td><strong style="color: #60a5fa;">{{ st.roll_number }}</strong></td>
+                            <td>{{ st.name }}</td>
+                            <td>{{ st.branch }}-{{ st.section }}</td>
+                            <td>
+                                <span class="status-badge status-present">
+                                    {{ st.present }} / {{ st.total }} Checked In
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: #94a3b8;">No student attendance data recorded yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script Engine -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch('/api/analytics')
+        .then(res => res.json())
+        .then(data => {
+            // Chart defaults styling
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+
+            // 1. Daily Trend Line Chart
+            new Chart(document.getElementById('dailyTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.daily.labels,
+                    datasets: [{
+                        label: 'Check-Ins Present',
+                        data: data.daily.data,
+                        borderColor: '#00f5d4',
+                        backgroundColor: 'rgba(0, 245, 212, 0.15)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#00f5d4',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 2. Subject Bar Chart
+            new Chart(document.getElementById('subjectBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.subjects.labels,
+                    datasets: [{
+                        label: 'Sessions Conducted',
+                        data: data.subjects.data,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 3. Branch Turnout Rate Chart
+            new Chart(document.getElementById('branchChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.branches.labels,
+                    datasets: [{
+                        label: 'Turnout Rate (%)',
+                        data: data.branches.data,
+                        backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { max: 100, min: 0 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 4. Yield Doughnut Chart
+            const presentToday = {{ present_today }};
+            const absentToday = {{ absent_today }};
+            new Chart(document.getElementById('yieldDoughnutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Present Today', 'Absent / Unrecorded'],
+                    datasets: [{
+                        data: [presentToday, absentToday],
+                        backgroundColor: ['#22c55e', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        })
+        .catch(err => console.error("Error loading analytics charts:", err));
+});
+</script>
+{% endblock %}

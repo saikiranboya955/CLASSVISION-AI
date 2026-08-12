@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Face Recognition Attendance{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 960px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                <span style="display: inline-block; width: 12px; height: 12px; background: {% if attendance_session.is_locked %}#ef4444{% else %}#22c55e{% endif %}; border-radius: 50%; box-shadow: 0 0 10px {% if attendance_session.is_locked %}#ef4444{% else %}#22c55e{% endif %};"></span>
+                Live Face Recognition Attendance
+            </h3>
+            <p style="color: #94a3b8; margin-top: 0.25rem; font-size: 0.9rem;">
+                <strong>Subject:</strong> {{ attendance_session.subject }} | 
+                <strong>Class:</strong> {{ attendance_session.branch }} - Sec {{ attendance_session.section }} | 
+                <strong>Date:</strong> {{ attendance_session.date }}
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            {% if not attendance_session.is_locked %}
+                <form method="POST" action="{{ url_for('submit_attendance_session', session_id=attendance_session.id) }}" id="submitAttendanceForm" onsubmit="return confirm('Are you sure you want to Finalize & Lock this attendance session? All un-detected students in {{ attendance_session.branch }}-{{ attendance_session.section }} will be automatically marked ABSENT.');">
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 0.65rem 1.25rem;">
+                        🔒 Submit & Finalize Session
+                    </button>
+                </form>
+            {% else %}
+                <span class="status-badge status-absent" style="font-size: 0.875rem; padding: 0.5rem 1rem;">🔒 SESSION FINALIZED & LOCKED</span>
+            {% endif %}
+            <a href="{{ url_for('attendance_detail', session_id=attendance_session.id) }}" class="btn btn-secondary" onclick="stopRecognition()">
+                View Roster Details →
+            </a>
+        </div>
+    </div>
+
+    {% if attendance_session.is_locked %}
+        <div class="alert alert-error" style="margin-bottom: 1.5rem; font-size: 0.95rem;">
+            <span>🔒</span>
+            <span>This attendance session has been finalized and locked by faculty. No further live check-ins can be recorded.</span>
+        </div>
+    {% endif %}
+    
+    <div style="background: rgba(15, 23, 42, 0.85); border-radius: 16px; padding: 2rem; border: 1px solid rgba(148, 163, 184, 0.15); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+        
+        <!-- Anti-Spoof Liveness Toggle Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: rgba(2, 6, 23, 0.6); padding: 0.75rem 1.25rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">🛡️</span>
+                <span style="color: #cbd5e1; font-weight: 600; font-size: 0.875rem;">MediaPipe Face Mesh Liveness Verification</span>
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #60a5fa; font-size: 0.85rem; font-weight: 600;">
+                <input type="checkbox" id="livenessToggle" style="accent-color: #3b82f6; width: 16px; height: 16px;">
+                <span>Enable Anti-Spoofing Prompts</span>
+            </label>
+        </div>
+
+        <!-- Video Stream Viewport -->
+        <div style="position: relative; max-width: 680px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid rgba(59, 130, 246, 0.3);" data-session-id="{{ attendance_session.id }}">
+            <video id="video" autoplay playsinline style="width: 100%; display: block; background: #000;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            
+            <!-- AI Reticle Bounding Box HUD Overlay -->
+            <div id="hud-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 240px; height: 250px; border: 2px dashed rgba(59, 130, 246, 0.6); border-radius: 24px; position: relative; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);">
+                    <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 3px solid #3b82f6; border-left: 3px solid #3b82f6; border-top-left-radius: 8px;"></div>
+                    <div style="position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-top: 3px solid #3b82f6; border-right: 3px solid #3b82f6; border-top-right-radius: 8px;"></div>
+                    <div style="position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-bottom: 3px solid #3b82f6; border-left: 3px solid #3b82f6; border-bottom-left-radius: 8px;"></div>
+                    <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 3px solid #3b82f6; border-right: 3px solid #3b82f6; border-bottom-right-radius: 8px;"></div>
+                </div>
+            </div>
+
+            <!-- Liveness Prompt Overlay Banner -->
+            <div id="livenessPromptOverlay" style="position: absolute; top: 12px; left: 12px; right: 12px; background: rgba(59, 130, 246, 0.95); backdrop-filter: blur(8px); padding: 0.75rem 1rem; border-radius: 8px; color: white; font-weight: 600; text-align: center; display: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
+                <span id="livenessPromptText">👁️ LIVENESS CHECK: Please Blink Eyes Slowly...</span>
+            </div>
+
+            <!-- Recognition Success Overlay Banner -->
+            <div id="recognition-overlay" style="position: absolute; top: 12px; left: 12px; right: 12px; background: rgba(16, 185, 129, 0.95); backdrop-filter: blur(8px); padding: 0.75rem 1rem; border-radius: 8px; color: white; font-weight: 600; text-align: center; display: none;">
+                <span id="overlay-text">✓ Attendance Recorded Successfully</span>
+            </div>
+        </div>
+        
+        <!-- Result Modal -->
+        <div id="recognition-result" style="margin-top: 1.5rem; display: none; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 1.5rem; animation: fadeIn 0.4s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(34, 197, 94, 0.2); padding-bottom: 0.75rem;">
+                <h4 style="color: #4ade80; margin: 0; font-size: 1.125rem; display: flex; align-items: center; gap: 8px;">
+                    <span>✅</span> ATTENDANCE MARKED PRESENT
+                </h4>
+                <span class="status-badge status-present" style="font-size: 0.875rem; padding: 0.35rem 0.85rem;">PRESENT</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div>
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Student Name</p>
+                    <p id="result-name" style="color: #f8fafc; font-weight: 600; font-size: 1.1rem; margin-top: 2px;">—</p>
+                </div>
+                <div>
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Roll / Enrollment</p>
+                    <p id="result-roll" style="color: #60a5fa; font-weight: 600; font-size: 1.1rem; margin-top: 2px;">—</p>
+                </div>
+                <div>
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Branch & Section</p>
+                    <p id="result-branch-sec" style="color: #f8fafc; font-weight: 500; margin-top: 2px;">—</p>
+                </div>
+                <div>
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Check-In Time</p>
+                    <p id="result-time" style="color: #4ade80; font-weight: 600; margin-top: 2px;">—</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Live Status Bar -->
+        <div id="status" style="margin-top: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.95rem; min-height: 24px;">
+            {% if not attendance_session.is_locked %}
+                <p>Click "Start Camera" to initialize AI Face Recognition</p>
+            {% else %}
+                <p style="color: #f87171;">Session is finalized and locked. View student details or export attendance reports.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+            {% if not attendance_session.is_locked %}
+                <button id="start-btn" class="btn btn-primary" onclick="startRecognition()" style="padding: 0.75rem 2rem; font-size: 1rem;">
+                    📷 Start Camera & Recognition
+                </button>
+                <button id="stop-btn" class="btn btn-danger" onclick="stopRecognition()" style="display: none; padding: 0.75rem 2rem; font-size: 1rem;">
+                    ⏹ Stop Camera
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+let video;
+let canvas;
+let stream = null;
+let recognitionInterval = null;
+let isProcessing = false;
+let isCooldown = false;
+let lastMessageTime = 0;
+const RECOGNITION_COOLDOWN = 3500;
+const sessionId = parseInt(document.querySelector('[data-session-id]').dataset.sessionId);
+const isLocked = {{ 1 if attendance_session.is_locked else 0 }};
+
+// Liveness prompts sequence
+const livenessPrompts = [
+    "👁️ LIVENESS CHECK: Please Blink Eyes Slowly...",
+    "😊 LIVENESS CHECK: Please Smile for Verification...",
+    "🗣️ LIVENESS CHECK: Turn Head Slightly Left/Right..."
+];
+let currentPromptIdx = 0;
+
+async function startRecognition() {
+    if (isLocked) return;
+    try {
+        if (stream) {
+            stopRecognition();
+        }
+        
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } });
+        video = document.getElementById('video');
+        video.srcObject = stream;
+        
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('stop-btn').style.display = 'inline-flex';
+        document.getElementById('status').innerHTML = '<p style="color: #4ade80;">📷 Camera Active. Scanning faces...</p>';
+        
+        recognitionInterval = setInterval(captureAndRecognize, 850);
+    } catch (err) {
+        stopRecognition();
+        document.getElementById('status').innerHTML = '<p style="color: #f87171;">⚠️ Camera access denied or unavailable.</p>';
+        console.error(err);
+    }
+}
+
+function stopRecognition() {
+    if (recognitionInterval) {
+        clearInterval(recognitionInterval);
+        recognitionInterval = null;
+    }
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    
+    if (!isLocked) {
+        document.getElementById('start-btn').style.display = 'inline-flex';
+        document.getElementById('stop-btn').style.display = 'none';
+        document.getElementById('status').innerHTML = '<p>Camera stopped.</p>';
+    }
+}
+
+window.addEventListener('beforeunload', stopRecognition);
+
+async function captureAndRecognize() {
+    if (isProcessing || isCooldown || !stream || isLocked) {
+        return;
+    }
+    
+    // Check if Liveness Verification is enabled
+    const livenessEnabled = document.getElementById('livenessToggle').checked;
+    if (livenessEnabled) {
+        const promptEl = document.getElementById('livenessPromptOverlay');
+        const textEl = document.getElementById('livenessPromptText');
+        promptEl.style.display = 'block';
+        textEl.textContent = livenessPrompts[currentPromptIdx];
+        
+        // Cycle liveness prompts
+        if (Math.random() > 0.7) {
+            currentPromptIdx = (currentPromptIdx + 1) % livenessPrompts.length;
+        }
+    } else {
+        document.getElementById('livenessPromptOverlay').style.display = 'none';
+    }
+
+    isProcessing = true;
+    
+    canvas = document.getElementById('canvas');
+    video = document.getElementById('video');
+    
+    if (!video.videoWidth || !video.videoHeight) {
+        isProcessing = false;
+        return;
+    }
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL('image/jpeg', 0.85);
+    
+    try {
+        const response = await fetch('/api/recognize-face', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: sessionId,
+                image: imageData
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.recognized) {
+            showRecognitionResult(result.student);
+            isCooldown = true;
+            document.getElementById('status').innerHTML = `<p style="color: #4ade80;">✅ Marked Present: <strong>${result.student.name}</strong></p>`;
+            
+            setTimeout(() => {
+                isCooldown = false;
+                document.getElementById('status').innerHTML = '<p style="color: #4ade80;">📷 Camera Active. Scanning next face...</p>';
+            }, RECOGNITION_COOLDOWN);
+            
+        } else if (result.already_marked) {
+            document.getElementById('status').innerHTML = `<p style="color: #f59e0b;">⚠️ ${result.message}</p>`;
+            isCooldown = true;
+            setTimeout(() => { isCooldown = false; }, 3000);
+        } else if (result.session_locked) {
+            stopRecognition();
+            document.getElementById('status').innerHTML = '<p style="color: #f87171;">Session is locked. Camera stopped.</p>';
+        } else if (result.message) {
+            const now = Date.now();
+            if (now - lastMessageTime > 3000) {
+                document.getElementById('status').innerHTML = `<p style="color: #f87171;">${result.message}</p>`;
+                lastMessageTime = now;
+            }
+        }
+    } catch (err) {
+        console.error('Recognition API error:', err);
+    } finally {
+        isProcessing = false;
+    }
+}
+
+function showRecognitionResult(student) {
+    const resultCard = document.getElementById('recognition-result');
+    const overlay = document.getElementById('recognition-overlay');
+    const overlayText = document.getElementById('overlay-text');
+    
+    resultCard.style.display = 'block';
+    document.getElementById('result-name').textContent = student.name;
+    document.getElementById('result-roll').textContent = student.roll_number;
+    document.getElementById('result-branch-sec').textContent = `${student.branch} - Sec ${student.section}`;
+    document.getElementById('result-time').textContent = student.check_in_time || new Date().toLocaleTimeString();
+    
+    overlayText.textContent = `✓ ${student.name} (${student.roll_number}) - Present`;
+    overlay.style.display = 'block';
+    
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 3000);
+}
+</script>
+{% endblock %}

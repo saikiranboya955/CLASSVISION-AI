@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Sessions Log{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc;">Attendance History & Log</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem;">View and manage recorded AI attendance sessions.</p>
+    </div>
+    <a href="{{ url_for('take_attendance') }}" class="btn btn-primary">
+        ➕ New Attendance Session
+    </a>
+</div>
+
+<!-- Filters Card -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" value="{{ subject_filter }}" placeholder="Filter by subject...">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="branch">Branch</label>
+            <select id="branch" name="branch">
+                <option value="">All Branches</option>
+                <option value="CSE" {{ 'selected' if branch_filter == 'CSE' else '' }}>CSE</option>
+                <option value="CSE - AI & ML" {{ 'selected' if branch_filter == 'CSE - AI & ML' else '' }}>CSE - AI & ML</option>
+                <option value="CSE - Data Science" {{ 'selected' if branch_filter == 'CSE - Data Science' else '' }}>CSE - Data Science</option>
+                <option value="IT" {{ 'selected' if branch_filter == 'IT' else '' }}>IT</option>
+                <option value="ECE" {{ 'selected' if branch_filter == 'ECE' else '' }}>ECE</option>
+                <option value="EEE" {{ 'selected' if branch_filter == 'EEE' else '' }}>EEE</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="section">Section</label>
+            <select id="section" name="section">
+                <option value="">All Sections</option>
+                <option value="A" {{ 'selected' if section_filter == 'A' else '' }}>Section A</option>
+                <option value="B" {{ 'selected' if section_filter == 'B' else '' }}>Section B</option>
+                <option value="C" {{ 'selected' if section_filter == 'C' else '' }}>Section C</option>
+                <option value="D" {{ 'selected' if section_filter == 'D' else '' }}>Section D</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" value="{{ date_filter }}">
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-secondary" style="flex: 1; justify-content: center;">Filter</button>
+            <a href="{{ url_for('attendance') }}" class="btn btn-secondary" style="padding: 0.625rem;">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Sessions Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>Branch / Sec</th>
+                    <th>Date</th>
+                    <th>Started At</th>
+                    <th>Present Count</th>
+                    <th>Faculty</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if sessions %}
+                    {% for s in sessions %}
+                    <tr>
+                        <td>#{{ s.id }}</td>
+                        <td><strong>{{ s.subject }}</strong></td>
+                        <td><span class="status-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">{{ s.branch }} - Sec {{ s.section }}</span></td>
+                        <td>{{ s.date }}</td>
+                        <td>{{ s.started_at }}</td>
+                        <td>
+                            <span class="status-badge status-present">
+                                {{ s.present_count }} Present
+                            </span>
+                        </td>
+                        <td>{{ s.faculty_name }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{{ url_for('attendance_detail', session_id=s.id) }}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;">
+                                    View Details
+                                </a>
+                                <a href="{{ url_for('face_recognition_attendance', session_id=s.id) }}" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;">
+                                    📷 Resume AI
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            No attendance sessions recorded yet. Click "New Attendance Session" to start.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

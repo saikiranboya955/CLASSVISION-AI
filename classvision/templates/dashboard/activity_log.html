@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Activity Audit Log{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin: 0;">📜 Faculty Activity Audit Trail</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">System audit log recording faculty logins, session submissions, manual overrides, and model training.</p>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+        ← Back to Dashboard
+    </a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Timestamp</th>
+                    <th>Faculty Name</th>
+                    <th>Action Category</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for log in logs %}
+                    <tr>
+                        <td>#{{ log.id }}</td>
+                        <td style="color: #94a3b8; font-size: 0.825rem;">{{ log.created_at }}</td>
+                        <td><strong>{{ log.faculty_name }}</strong></td>
+                        <td>
+                            {% if log.action_type == 'LOGIN' %}
+                                <span class="status-badge status-present">🔑 LOGIN</span>
+                            {% elif log.action_type == 'SUBMIT_ATTENDANCE' %}
+                                <span class="status-badge status-present" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">🔒 SUBMIT ATTENDANCE</span>
+                            {% elif log.action_type == 'MANUAL_EDIT' %}
+                                <span class="status-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">✏️ MANUAL EDIT</span>
+                            {% elif log.action_type == 'TRAIN_MODEL' %}
+                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc;">🧠 TRAIN MODEL</span>
+                            {% else %}
+                                <span class="status-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">{{ log.action_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.description }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            No faculty activity logs recorded yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

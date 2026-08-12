@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Face Dataset Capture - {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 850px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); padding-bottom: 1rem;">
+        <div>
+            <h3 style="font-size: 1.35rem; color: #f8fafc; margin: 0;">📸 Face Dataset Capture & Quality Validation</h3>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">Capture 50 high-quality face angles for automated LBPH model training.</p>
+        </div>
+        <a href="{{ url_for('students') }}" class="btn btn-secondary" onclick="stopCamera()">← Back to Students</a>
+    </div>
+
+    <!-- Student Metadata Card -->
+    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; border: 1px solid rgba(148, 163, 184, 0.1);">
+        <div>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Student Name</span>
+            <p style="color: #f8fafc; font-weight: 600; margin-top: 2px;">{{ student.name }}</p>
+        </div>
+        <div>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Roll / Enrollment</span>
+            <p style="color: #60a5fa; font-weight: 600; margin-top: 2px;">{{ student.roll_number }}</p>
+        </div>
+        <div>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Branch & Section</span>
+            <p style="color: #f8fafc; margin-top: 2px;">{{ student.branch }} - Sec {{ student.section }}</p>
+        </div>
+        <div>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Dataset Status</span>
+            <p style="margin-top: 2px;">
+                {% if student.face_registered %}
+                    <span class="status-badge status-present">Registered</span>
+                {% else %}
+                    <span class="status-badge status-absent">Pending Capture</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Camera Viewport Container -->
+    <div style="background: rgba(15, 23, 42, 0.9); border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.15);">
+        <div id="camera-container" style="position: relative; max-width: 640px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid rgba(59, 130, 246, 0.3);" data-student-id="{{ student.id }}">
+            <video id="video" autoplay playsinline style="width: 100%; display: block; background: #000;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            
+            <!-- AI Positioning Guide Overlay -->
+            <div id="guide-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 220px; height: 260px; border: 2px dashed rgba(34, 197, 94, 0.7); border-radius: 50%; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);"></div>
+            </div>
+        </div>
+        
+        <!-- Live Quality Status Feedback -->
+        <div id="status" style="margin-top: 1.25rem; font-size: 0.95rem; color: #94a3b8; min-height: 28px;">
+            <p>Click "Start Camera" to initialize AI Face Capture</p>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div id="progress" style="margin-top: 1rem; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: #94a3b8;">
+                <span>Capturing Face Angles</span>
+                <span id="capture-percentage" style="color: #3b82f6; font-weight: 600;">0%</span>
+            </div>
+            <div style="width: 100%; height: 10px; background: rgba(148, 163, 184, 0.1); border-radius: 5px; overflow: hidden;">
+                <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.3s ease;"></div>
+            </div>
+            <p style="color: #3b82f6; font-size: 1.1rem; font-weight: 600; margin-top: 8px;">
+                Captured: <span id="capture-count">0</span> / 50 Images
+            </p>
+        </div>
+        
+        <!-- Controls -->
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <button id="start-btn" class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+            <button id="capture-btn" class="btn btn-primary" onclick="captureImages()" style="display: none; background: linear-gradient(135deg, #22c55e, #16a34a);">
+                ⚡ Start Capturing Dataset
+            </button>
+            <button id="train-btn" class="btn btn-primary" onclick="trainModel()" style="display: none; background: linear-gradient(135deg, #8b5cf6, #6366f1);">
+                🧠 Train LBPH Model
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let video;
+let canvas;
+let stream = null;
+let captureCount = 0;
+let captureInterval = null;
+let lastFrameData = null;
+let consecutiveFailures = 0;
+const MAX_CAPTURES = 50;
+const MAX_FAILURES = 15;
+const studentId = parseInt(document.getElementById('camera-container').dataset.studentId);
+
+async function startCamera() {
+    try {
+        if (stream) {
+            stopCamera();
+        }
+        
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } });
+        video = document.getElementById('video');
+        video.srcObject = stream;
+        
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('capture-btn').style.display = 'inline-flex';
+        document.getElementById('status').innerHTML = '<p style="color: #4ade80;">📷 Camera initialized. Center your face inside the green guide oval.</p>';
+    } catch (err) {
+        stopCamera();
+        document.getElementById('status').innerHTML = '<p style="color: #f87171;">⚠️ Unable to access camera. Please allow camera permissions.</p>';
+        console.error(err);
+    }
+}
+
+function stopCamera() {
+    if (captureInterval) {
+        clearInterval(captureInterval);
+        captureInterval = null;
+    }
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+}
+
+window.addEventListener('beforeunload', stopCamera);
+
+function isFrameSufficientlyDifferent(currentData, previousData) {
+    if (!previousData) return true;
+    const sampleSize = 1200;
+    const s1 = currentData.substring(500, 500 + sampleSize);
+    const s2 = previousData.substring(500, 500 + sampleSize);
+    let diff = 0;
+    for (let i = 0; i < sampleSize; i++) {
+        if (s1[i] !== s2[i]) diff++;
+    }
+    return diff > (sampleSize * 0.04);
+}
+
+async function captureImages() {
+    const captureBtn = document.getElementById('capture-btn');
+    captureBtn.disabled = true;
+    
+    canvas = document.getElementById('canvas');
+    video = document.getElementById('video');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const initialFrame = canvas.toDataURL('image/jpeg', 0.85);
+    
+    document.getElementById('status').innerHTML = '<p style="color: #3b82f6;">🔍 Verifying face uniqueness & quality...</p>';
+    
+    // Step 1: Duplicate Face Check
+    try {
+        const dupResponse = await fetch('/api/check-duplicate-face', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: studentId, image: initialFrame })
+        });
+        
+        const dupResult = await dupResponse.json();
+        
+        if (dupResult.is_duplicate) {
+            document.getElementById('status').innerHTML = `<p style="color: #f87171; font-weight: 600;">🚫 ${dupResult.message}</p>`;
+            captureBtn.disabled = false;
+            return;
+        }
+    } catch (err) {
+        console.warn('Duplicate face check warning:', err);
+    }
+    
+    // Step 2: Begin Dataset Loop
+    document.getElementById('capture-btn').style.display = 'none';
+    document.getElementById('progress').style.display = 'block';
+    captureCount = 0;
+    consecutiveFailures = 0;
+    lastFrameData = null;
+    
+    captureInterval = setInterval(async () => {
+        if (captureCount >= MAX_CAPTURES) {
+            clearInterval(captureInterval);
+            document.getElementById('status').innerHTML = '<p style="color: #4ade80; font-weight: 600;">🎉 50 High-quality images captured! Click "Train LBPH Model" below.</p>';
+            document.getElementById('train-btn').style.display = 'inline-flex';
+            return;
+        }
+        
+        if (consecutiveFailures >= MAX_FAILURES) {
+            clearInterval(captureInterval);
+            document.getElementById('status').innerHTML = '<p style="color: #f87171;">⚠️ Quality check failed multiple times. Ensure good lighting, hold face steady, and try again.</p>';
+            document.getElementById('capture-btn').style.display = 'inline-flex';
+            captureBtn.disabled = false;
+            return;
+        }
+        
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const currentFrame = canvas.toDataURL('image/jpeg', 0.85);
+        
+        if (!isFrameSufficientlyDifferent(currentFrame, lastFrameData)) {
+            return; // Skip duplicate static frame
+        }
+        
+        try {
+            const resp = await fetch('/api/capture-face', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    image: currentFrame,
+                    count: captureCount
+                })
+            });
+            
+            const res = await resp.json();
+            
+            if (res.success) {
+                captureCount++;
+                lastFrameData = currentFrame;
+                consecutiveFailures = 0;
+                
+                const pct = Math.round((captureCount / MAX_CAPTURES) * 100);
+                document.getElementById('capture-count').textContent = captureCount;
+                document.getElementById('capture-percentage').textContent = pct + '%';
+                document.getElementById('progress-bar-fill').style.width = pct + '%';
+                document.getElementById('status').innerHTML = `<p style="color: #4ade80;">Capturing... Slowly move your head slightly (left, right, tilt).</p>`;
+            } else {
+                consecutiveFailures++;
+                document.getElementById('status').innerHTML = `<p style="color: #f59e0b;">Quality Warning: ${res.message || 'Adjust face position'}</p>`;
+            }
+        } catch (err) {
+            consecutiveFailures++;
+        }
+    }, 350);
+}
+
+async function trainModel() {
+    const trainBtn = document.getElementById('train-btn');
+    trainBtn.disabled = true;
+    trainBtn.innerHTML = '⚡ Training Model... Please wait...';
+    document.getElementById('status').innerHTML = '<p style="color: #3b82f6;">🧠 Training LBPH Face Recognition Model...</p>';
+    
+    try {
+        const response = await fetch(`/students/${studentId}/train-face`, { method: 'POST' });
+        const res = await response.json();
+        
+        if (response.ok && res.success) {
+            document.getElementById('status').innerHTML = '<p style="color: #4ade80; font-weight: 600;">✅ Model trained successfully! Redirecting to student list...</p>';
+            setTimeout(() => {
+                window.location.href = res.redirect || '/students';
+            }, 1500);
+        } else {
+            document.getElementById('status').innerHTML = `<p style="color: #f87171;">⚠️ ${res.message || 'Training failed.'}</p>`;
+            trainBtn.disabled = false;
+            trainBtn.innerHTML = '🧠 Retry Model Training';
+        }
+    } catch (err) {
+        document.getElementById('status').innerHTML = '<p style="color: #f87171;">⚠️ Training error occurred.</p>';
+        trainBtn.disabled = false;
+        trainBtn.innerHTML = '🧠 Retry Model Training';
+    }
+}
+</script>
+{% endblock %}

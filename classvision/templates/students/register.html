@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Register Student{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <div style="margin-bottom: 1.5rem; border-bottom: 1px solid rgba(148, 163, 184, 0.1); padding-bottom: 1rem;">
+        <h3 style="display: flex; align-items: center; gap: 10px;">
+            <span>👥</span> Register New Student
+        </h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">Enter student credentials to prepare for AI face recognition dataset capture.</p>
+    </div>
+
+    <form method="POST" id="registerStudentForm">
+        <div class="form-group">
+            <label for="name">Student Full Name *</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., Alex Johnson" value="{{ name or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="roll_number">Roll / Enrollment Number *</label>
+            <input type="text" id="roll_number" name="roll_number" required placeholder="e.g., 23D41AC011" value="{{ roll_number or '' }}">
+            <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px;">Must be a unique alphanumeric student identification number.</small>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="branch">Branch *</label>
+                <select id="branch" name="branch" required>
+                    <option value="">Select Branch</option>
+                    <option value="CSE" {{ 'selected' if branch == 'CSE' else '' }}>CSE</option>
+                    <option value="CSE - AI & ML" {{ 'selected' if branch == 'CSE - AI & ML' else '' }}>CSE - AI & ML</option>
+                    <option value="CSE - Data Science" {{ 'selected' if branch == 'CSE - Data Science' else '' }}>CSE - Data Science</option>
+                    <option value="IT" {{ 'selected' if branch == 'IT' else '' }}>IT</option>
+                    <option value="ECE" {{ 'selected' if branch == 'ECE' else '' }}>ECE</option>
+                    <option value="EEE" {{ 'selected' if branch == 'EEE' else '' }}>EEE</option>
+                    <option value="Mechanical" {{ 'selected' if branch == 'Mechanical' else '' }}>Mechanical</option>
+                    <option value="Civil" {{ 'selected' if branch == 'Civil' else '' }}>Civil</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="section">Section *</label>
+                <select id="section" name="section" required>
+                    <option value="">Select Section</option>
+                    <option value="A" {{ 'selected' if section == 'A' else '' }}>Section A</option>
+                    <option value="B" {{ 'selected' if section == 'B' else '' }}>Section B</option>
+                    <option value="C" {{ 'selected' if section == 'C' else '' }}>Section C</option>
+                    <option value="D" {{ 'selected' if section == 'D' else '' }}>Section D</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center; padding: 0.75rem;">
+                ➡️ Register & Proceed to Face Capture
+            </button>
+            <a href="{{ url_for('students') }}" class="btn btn-secondary" style="padding: 0.75rem 1.25rem;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('registerStudentForm').addEventListener('submit', function() {
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = 'Registering Student...';
+});
+</script>
+{% endblock %}
