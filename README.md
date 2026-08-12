@@ -564,6 +564,13 @@ The application will start on the local Flask server and the terminal will displ
 </p>
 ---
 
+### 👨‍🏫 Faculty Profile
+
+<p align="center">
+  <img src="docs/screenshots/faculty-profile.png" alt="ClassVision AI Faculty Profile" width="100%">
+</p>
+---
+
 ## Future Scope
 
 Potential future improvements include:
