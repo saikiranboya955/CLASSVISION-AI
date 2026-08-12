@@ -1,18 +1,39 @@
+# 🚀 ClassVision AI
 
-# ClassVision AI
-
-## Smart Attendance Management System Using Face Recognition and QR Backup
+## 🎓 Smart Attendance Management System Using Face Recognition & QR Backup
 
 <p align="center">
-  <strong>ClassVision AI</strong><br>
-  Smart, Secure, and Automated Attendance Management
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Backend-black?style=for-the-badge&logo=flask&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-Computer%20Vision-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-Frontend-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+
 </p>
 
 <p align="center">
-  Python • Flask • OpenCV • LBPH • SQLite • JavaScript
+
+![LBPH](https://img.shields.io/badge/LBPH-Face%20Recognition-7B61FF?style=flat-square)
+![Chart.js](https://img.shields.io/badge/Chart.js-Analytics-FF6384?style=flat-square)
+![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-150458?style=flat-square&logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-Numerical%20Computing-013243?style=flat-square&logo=numpy&logoColor=white)
+![pyttsx3](https://img.shields.io/badge/pyttsx3-Voice%20Notifications-4CAF50?style=flat-square)
+
+</p>
+
+<p align="center">
+  <strong>🤖 Smart • 🔐 Secure • 📊 Automated • ⚡ Real-Time</strong>
 </p>
 
 ---
+
+### 👨‍💻 Developed By
+
+# **SAI KIRAN BOYA**
+
+> Transforming attendance into intelligent automation.
 
 ## Overview
 
@@ -407,6 +428,23 @@ ClassVision AI can be adapted for:
 * Other organizations requiring structured attendance management
 
 ---
+## 🌐 Languages Used
+
+| Language | Usage |
+|---|---:|
+| 🐍 **Python** | **66%** |
+| 🟧 **HTML** | **24%** |
+| 🔷 **TypeScript** | **10%** |
+
+<p align="center">
+
+![Python](https://img.shields.io/badge/Python-66%25-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML-24%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-10%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+
+</p>
+
+---
 
 ## Advantages
 
@@ -469,38 +507,61 @@ The application will start on the local Flask server and the terminal will displ
 
 ---
 
-## Screenshots
+## 🖥️ Application Screenshots
 
-Actual ClassVision AI interface screenshots can be added here:
+### 🔐 Login
 
-### Login
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="ClassVision AI Login" width="100%">
+</p>
 
-![ClassVision AI Login](docs/screenshots/login.png)
+---
 
-### Dashboard
+### 📊 Dashboard
 
-![ClassVision AI Dashboard](docs/screenshots/dashboard.png)
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="ClassVision AI Dashboard" width="100%">
+</p>
 
-### Student Registration
+---
 
-![Student Registration](docs/screenshots/student-registration.png)
+### 📸 Student Registration & Face Dataset Capture
 
-### Face Recognition Attendance
+<p align="center">
+  <img src="docs/screenshots/student-registration.png" alt="Student Registration and Face Dataset Capture" width="100%">
+</p>
 
-![Face Recognition Attendance](docs/screenshots/face-attendance.png)
+---
 
-### QR Attendance
+### 🤖 Face Recognition Attendance
 
-![QR Attendance](docs/screenshots/qr-attendance.png)
+<p align="center">
+  <img src="docs/screenshots/face-attendance.png" alt="Face Recognition Attendance" width="100%">
+</p>
 
-### Student Profile
+---
 
-![Student Profile](docs/screenshots/student-profile.png)
+### 📱 QR Backup Attendance
 
-### Reports and Analytics
+<p align="center">
+  <img src="docs/screenshots/qr-attendance.png" alt="QR Backup Attendance" width="100%">
+</p>
 
-![Reports and Analytics](docs/screenshots/reports.png)
+---
 
+### 👤 Student Profile
+
+<p align="center">
+  <img src="docs/screenshots/student-profile.png" alt="Student Attendance Profile" width="100%">
+</p>
+
+---
+
+### 📈 Reports & Analytics
+
+<p align="center">
+  <img src="docs/screenshots/reports.png" alt="ClassVision AI Reports and Analytics" width="100%">
+</p>
 ---
 
 ## Future Scope
@@ -518,27 +579,49 @@ Potential future improvements include:
 ---
 
 
-## Academic Project
+## 👨‍💻 Developer
 
-ClassVision AI was developed as an academic project to demonstrate the practical application of:
+### **SAI KIRAN BOYA**
 
-* Artificial Intelligence
-* Computer Vision
-* Web Development
-* Database Management
-* Automated Attendance Systems
-
-The project focuses on solving a real-world attendance management problem using a combination of software and AI technologies.
+Developed as an academic project focused on applying Artificial Intelligence, Computer Vision, Web Development, and Database Management to real-world attendance automation.
 
 ---
 
-## Repository
+## 🎓 Academic Project
 
-**GitHub:**
-https://github.com/saikiranboya955/CLASSVISION-AI
+ClassVision AI demonstrates the practical application of:
+
+- 🤖 Artificial Intelligence
+- 👁️ Computer Vision
+- 🌐 Web Development
+- 🗄️ Database Management
+- 📊 Data Analytics
+- 🔐 Secure Attendance Management
 
 ---
 
-## License
+## 🚀 Future Scope
 
-This project is developed for academic and educational purposes.
+- ☁️ Cloud deployment
+- 📱 Mobile application
+- 🧠 Deep-learning-based face recognition
+- 🎥 Multi-camera attendance
+- 📩 Automated notifications
+- 📊 Advanced institutional analytics
+- 🏫 Multi-campus deployment
+
+---
+
+## 🔗 Repository
+
+[![GitHub Repository](https://img.shields.io/badge/GitHub-ClassVision%20AI-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/saikiranboya955/CLASSVISION-AI)
+
+---
+
+<p align="center">
+
+### ⭐ ClassVision AI
+
+**Smart • Secure • Automated Attendance**
+
+</p>
