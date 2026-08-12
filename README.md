@@ -517,17 +517,6 @@ Potential future improvements include:
 
 ---
 
-## Team
-
-### Sai Kiran Boya
-
-Project Developer
-
-### Vishnu Vardhan
-
-Project Developer
-
----
 
 ## Academic Project
 
