@@ -400,33 +400,46 @@ ClassVision AI provides analytics to help faculty understand attendance performa
 </table>
 
 ---
-
 ## 🌐 Languages Used
 
 <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid black;">
-  <thead>
-    <tr style="background-color:#1f2937; color:#ffffff;">
-      <th style="border: 1px solid black; padding: 8px;">Language</th>
-      <th style="border: 1px solid black; padding: 8px;">Usage</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td style="border: 1px solid black; padding: 8px;">🐍 Python</td><td style="border: 1px solid black; padding: 8px;"><b>66%</b></td></tr>
-    <tr style="background-color:#f3f4f6;"><td style="border: 1px solid black; padding: 8px;">🟧 HTML</td><td style="border: 1px solid black; padding: 8px;"><b>24%</b></td></tr>
-    <tr><td style="border: 1px solid black; padding: 8px;">🔷 TypeScript</td><td style="border: 1px solid black; padding: 8px;"><b>10%</b></td></tr>
-  </tbody>
+<thead>
+<tr style="background-color:#1f2937; color:#ffffff;">
+<th style="border: 1px solid black; padding: 8px;">Language</th>
+<th style="border: 1px solid black; padding: 8px;">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: 1px solid black; padding: 8px;">🔷 TypeScript</td>
+<td style="border: 1px solid black; padding: 8px;"><b>42.6%</b></td>
+</tr>
+<tr style="background-color:#f3f4f6;">
+<td style="border: 1px solid black; padding: 8px;">🐍 Python</td>
+<td style="border: 1px solid black; padding: 8px;"><b>33.0%</b></td>
+</tr>
+<tr>
+<td style="border: 1px solid black; padding: 8px;">🟧 HTML</td>
+<td style="border: 1px solid black; padding: 8px;"><b>24.0%</b></td>
+</tr>
+<tr style="background-color:#f3f4f6;">
+<td style="border: 1px solid black; padding: 8px;">⚪ Other</td>
+<td style="border: 1px solid black; padding: 8px;"><b>0.4%</b></td>
+</tr>
+</tbody>
 </table>
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Python-66%25-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-<img src="https://img.shields.io/badge/HTML-24%25-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
-<img src="https://img.shields.io/badge/TypeScript-10%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/TypeScript-42.6%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/Python-33.0%25-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+<img src="https://img.shields.io/badge/HTML-24.0%25-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
+<img src="https://img.shields.io/badge/Other-0.4%25-6B7280?style=for-the-badge" />
 
 </div>
 
----
 
+---
 ## 💡 Advantages
 
 - Reduces manual attendance work
